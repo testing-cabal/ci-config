@@ -13,7 +13,7 @@ class testcabal_project::puppetmaster (
   cron { 'updatepuppetmaster':
     user        => 'root',
     minute      => '*/15',
-    command     => 'sleep $((RANDOM\%600)) && cd /opt/config/production && /usr/bin/git pull -q && /bin/bash install_modules.sh',
+    command     => 'sleep $((RANDOM\%600)) && cd /opt/config/production && git fetch -q && git reset -q --hard @{u} && ./install_modules.sh',
     environment => 'PATH=/var/lib/gems/1.8/bin:/usr/bin:/bin:/usr/sbin:/sbin',
   }
 
@@ -34,4 +34,9 @@ class testcabal_project::puppetmaster (
     replace => true,
     require => Class['testcabal_project::server'],
   }
+
+# For launch/launch-node.py.
+  package { 'python-cinderclient': ensure => latest, provider=> pip, }
+  package { 'python-novaclient': ensure => latest, provider=> pip, }
+  package { 'python-paramiko': ensure => latest }
 }
