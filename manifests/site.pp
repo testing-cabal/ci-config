@@ -11,8 +11,8 @@ node default {
 #
 # Long lived servers:
 #
-node 'review.openstack.org' {
-  class { 'openstack_project::review':
+node 'review.testing-cabal.org' {
+  class { 'testcabal_project::review':
     github_oauth_token              => hiera('gerrit_github_token'),
     github_project_username         => hiera('github_project_username'),
     github_project_password         => hiera('github_project_password'),
