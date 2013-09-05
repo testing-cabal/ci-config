@@ -81,16 +81,15 @@ node 'jenkins.openstack.org' {
   }
 }
 
-node 'jenkins01.openstack.org' {
-  class { 'openstack_project::jenkins':
+node 'jenkins01.testing-cabal.org' {
+  class { 'testcabal_project::jenkins':
     jenkins_jobs_password   => hiera('jenkins_jobs_password'),
     jenkins_ssh_private_key => hiera('jenkins_ssh_private_key_contents'),
     ssl_cert_file_contents  => hiera('jenkins01_ssl_cert_file_contents'),
     ssl_key_file_contents   => hiera('jenkins01_ssl_key_file_contents'),
     ssl_chain_file_contents => hiera('jenkins01_ssl_chain_file_contents'),
     sysadmins               => hiera('sysadmins'),
-    zmq_event_receivers     => ['logstash.openstack.org',
-                                'nodepool.openstack.org',
+    zmq_event_receivers     => [
     ],
   }
 }
@@ -370,6 +369,7 @@ node 'zuul.testing-cabal.org' {
     sysadmins            => hiera('sysadmins'),
     statsd_host          => 'graphite.testing-cabal.org',
     gearman_workers      => [
+      'jenkins01.testing-cabal.org',
     ],
   }
 }

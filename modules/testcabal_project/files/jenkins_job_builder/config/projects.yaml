@@ -1,0 +1,20 @@
+
+- project:
+    name: ci-config
+    github-org: testing-cabal
+    node: precise
+
+    jobs:
+      - gate-{name}-puppet-lint
+      - gate-{name}-puppet-syntax
+      - gate-{name}-pyflakes
+
+- project:
+    name: testtools
+    github-org: testing-cabal
+    node: precise
+    tarball-site: tarballs.testing-cabal.org
+
+    jobs:
+      - python-jobs
+      - pypi-jobs
