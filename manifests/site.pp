@@ -515,7 +515,6 @@ node /^centos6-?\d+\.slave\.testing-cabal\.org$/ {
   include testcabal_project
   include testcabal_project::puppet_cron
   class { 'testcabal_project::slave':
-    certname  => 'centos6.slave.testing-cabal.org',
     ssh_key   => $testcabal_project::jenkins_ssh_key,
     sysadmins => hiera('sysadmins'),
   }
