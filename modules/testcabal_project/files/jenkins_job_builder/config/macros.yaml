@@ -1,0 +1,153 @@
+- builder:
+    name: gerrit-git-prep
+    builders:
+      - shell: "/usr/local/jenkins/slave_scripts/gerrit-git-prep.sh https://review.testing-cabal.org http://zuul.testing-cabal.org https://review.testing-cabal.org/p"
+
+- builder:
+    name: coverage
+    builders:
+      - shell: "/usr/local/jenkins/slave_scripts/run-cover.sh {github-org} {project}"
+
+- builder:
+    name: docs
+    builders:
+      - shell: "/usr/local/jenkins/slave_scripts/run-docs.sh {github-org} {project}"
+
+- builder:
+    name: maven-test
+    builders:
+      - shell: "mvn test"
+
+- builder:
+    name: maven-package
+    builders:
+      - shell: "mvn package"
+
+- builder:
+    name: markdown-docbook
+    builders:
+      - shell: "/usr/local/jenkins/slave_scripts/markdown-docbook.sh {filename}"
+
+- builder:
+    name: gerrit-package
+    builders:
+      - shell: "/usr/local/jenkins/slave_scripts/package-gerrit.sh"
+
+- builder:
+    name: gerrit-preclean
+    builders:
+      - shell: |
+          #!/bin/bash -xe
+          rm -fr ~/.m2
+          rm -fr ~/.java
+          ./tools/version.sh --release
+
+- builder:
+    name: gerrit-postrun
+    builders:
+      - shell: "./tools/version.sh --reset"
+
+- builder:
+    name: pep8
+    builders:
+      - shell: "/usr/local/jenkins/slave_scripts/run-pep8.sh {github-org} {project}"
+
+- builder:
+    name: pylint
+    builders:
+      - shell: "/usr/local/jenkins/slave_scripts/run-pylint.sh {github-org} {project}"
+
+- builder:
+    name: pyflakes
+    builders:
+      - shell: "/usr/local/jenkins/slave_scripts/run-pyflakes.sh {github-org} {project}"
+
+- builder:
+    name: puppet-lint
+    builders:
+      - shell: |
+          if [ -f Modulefile ]; then
+            MODULE=$(awk '/^name/ {print $NF}' Modulefile |tr -d \"\')
+            if [ -z "$MODULE" ]; then
+              echo "Module name not defined in Modulefile"
+            else
+              mkdir -p "$MODULE"
+              rsync -a --exclude="$MODULE" --exclude ".*" . "$MODULE"
+              cd "$MODULE"
+            fi
+          fi
+          rake lint 2>&1
+
+- builder:
+    name: puppet-syntax
+    builders:
+      - shell: |
+          find . -iname *.pp | xargs puppet parser validate --modulepath=`pwd`/modules
+          for f in `find . -iname *.erb` ; do
+            erb -x -T '-' $f | ruby -c
+          done
+
+- builder:
+    name: run-tests
+    builders:
+      - shell: "./run-tests.sh {github-org} {project}"
+
+- builder:
+    name: selenium
+    builders:
+      - shell: "/usr/local/jenkins/slave_scripts/run-selenium.sh {github-org} {project}"
+
+- builder:
+    name: python26
+    builders:
+      - shell: "/usr/local/jenkins/slave_scripts/run-tox.sh 26 {github-org} {project}"
+
+- builder:
+    name: python27
+    builders:
+      - shell: "/usr/local/jenkins/slave_scripts/run-tox.sh 27 {github-org} {project}"
+
+- builder:
+    name: python33
+    builders:
+      - shell: "/usr/local/jenkins/slave_scripts/run-tox.sh 33 {github-org} {project}"
+
+- builder:
+    name: pypy
+    builders:
+      - shell: "/usr/local/jenkins/slave_scripts/run-tox.sh py {github-org} {project}"
+
+
+- publisher:
+    name: test-results
+    publishers:
+      - scp:
+          site: 'static.openstack.org'
+          files:
+            - target: 'logs/$LOG_PATH'
+              source: '**/*nose_results.html'
+              keep-hierarchy: false
+              copy-after-failure: true
+            - target: 'logs/$LOG_PATH'
+              source: '**/*testr_results.html.gz'
+              keep-hierarchy: false
+              copy-after-failure: true
+            - target: 'logs/$LOG_PATH'
+              source: '.testrepository/tmp*'
+              keep-hierarchy: false
+              copy-after-failure: true
+            - target: 'logs/$LOG_PATH'
+              source: '**/*subunit_log.txt.gz'
+              keep-hierarchy: false
+              copy-after-failure: true
+
+- publisher:
+    name: upload-sphinx-draft
+    publishers:
+      - scp:
+          site: 'static.openstack.org'
+          files:
+            - target: 'docs-draft/$LOG_PATH'
+              source: 'doc/build/html/**'
+              keep-hierarchy: true
+              copy-after-failure: true
