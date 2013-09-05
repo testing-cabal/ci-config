@@ -3,7 +3,7 @@
 #
 node default {
   include testcabal_project::puppet_cron
-  class { 'openstack_project::server':
+  class { 'testcabal_project::server':
     sysadmins => hiera('sysadmins'),
   }
 }
