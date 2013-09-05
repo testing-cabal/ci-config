@@ -3,6 +3,7 @@
 GERRIT_SITE=$1
 ZUUL_SITE=$2
 GIT_ORIGIN=$3
+export GIT_SSL_NO_VERIFY=1
 
 if [ -z "$GERRIT_SITE" ]
 then
