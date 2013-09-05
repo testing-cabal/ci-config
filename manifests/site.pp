@@ -361,19 +361,15 @@ node 'nodepool.openstack.org' {
   }
 }
 
-node 'zuul.openstack.org' {
-  class { 'openstack_project::zuul_prod':
-    gerrit_server        => 'review.openstack.org',
-    gerrit_user          => 'jenkins',
-    zuul_ssh_private_key => hiera('jenkins_ssh_private_key_contents'),
-    url_pattern          => 'http://logs.openstack.org/{build.parameters[LOG_PATH]}',
+node 'zuul.testing-cabal.org' {
+  class { 'testcabal_project::zuul_prod':
+    gerrit_server        => 'review.testing-cabal.org',
+    gerrit_user          => 'zuul',
+    zuul_ssh_private_key => hiera('zuul_ssh_private_key_contents'),
+    url_pattern          => 'http://logs.testing-cabal.org/{build.parameters[LOG_PATH]}',
     sysadmins            => hiera('sysadmins'),
-    statsd_host          => 'graphite.openstack.org',
+    statsd_host          => 'graphite.testing-cabal.org',
     gearman_workers      => [
-      'jenkins.openstack.org',
-      'jenkins01.openstack.org',
-      'jenkins02.openstack.org',
-      'jenkins-dev.openstack.org',
     ],
   }
 }
